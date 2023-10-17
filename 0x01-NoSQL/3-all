@@ -1,0 +1,2 @@
+// show all documents in collection school
+db.school.find();
