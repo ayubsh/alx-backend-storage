@@ -21,6 +21,8 @@ class Cache:
 
     def get(self, key: str,
             fn: Callable = None) -> Union[str, bytes, int, float]:
+        """gets vlu from redis data storege
+        """
         result = self._redis.get(key)
         if result is None:
             return None
