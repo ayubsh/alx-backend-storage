@@ -1,9 +1,24 @@
 #!/usr/bin/env python3
 """Redis server"""
-from typing import Union, Callable
+from typing import Union, Callable, Any
 import uuid
 import redis
+from functools import wraps
 
+
+def count_calls(method: Callable) -> Callable:
+    '''keeps count of the number of calls made
+    in cache
+    '''
+    @wraps(method)
+    def invoker(self, *args, **kwargs) -> Any:
+        '''calls the given func
+        after incr its call val
+        '''
+        if isinstance(self._redis, redis.Redis):
+            self._redis.incr(method.__qualname__)
+        return method(self, *args, **kwargs)
+    return invoker
 
 class Cache:
     def __init__(self):
@@ -12,6 +27,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb(True)
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """creates redis store
         """
