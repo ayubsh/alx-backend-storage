@@ -20,6 +20,23 @@ def count_calls(method: Callable) -> Callable:
         return method(self, *args, **kwargs)
     return invoker
 
+def call_history(method: Callable) -> Callable:
+    '''call history
+    '''
+    @wraps(method)
+    def invoker(self, *args, **kwargs) -> Any:
+        '''calls keeps track of call history
+        '''
+        in_key = '{}:inputs'.format(method.__qualname__)
+        out_key = '{}:outputs'.format(method.__qualname__)
+        if isinstance(self._redis, redis.Redis):
+            self._redis.rpush(in_key, str(args))
+        output = method(self, *args, **kwargs)
+        if isinstance(self._redis, redis.Redis):
+            self._redis.rpush(out_key, output)
+        return output
+    return invoker
+
 class Cache:
     def __init__(self):
         """initialses the redis store
@@ -28,6 +45,7 @@ class Cache:
         self._redis.flushdb(True)
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """creates redis store
         """
