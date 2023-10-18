@@ -20,6 +20,7 @@ def count_calls(method: Callable) -> Callable:
         return method(self, *args, **kwargs)
     return invoker
 
+
 def call_history(method: Callable) -> Callable:
     '''call history
     '''
@@ -36,6 +37,7 @@ def call_history(method: Callable) -> Callable:
             self._redis.rpush(out_key, output)
         return output
     return invoker
+
 
 def replay(fn: Callable) -> None:
     '''function to display the history of
@@ -61,6 +63,7 @@ def replay(fn: Callable) -> None:
             fxn_input.decode("utf-8"),
             fxn_output,
         ))
+
 
 class Cache:
     def __init__(self):
